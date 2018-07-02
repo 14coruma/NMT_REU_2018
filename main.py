@@ -3,6 +3,7 @@
 import preprocess as pproc
 import features as ft
 import trainer as tr
+import ui
 
 def main():
     images, targets = pproc.process()
