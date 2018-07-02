@@ -45,22 +45,17 @@ def makearray(f):
 
     return data
 
-def process(files):
-    targets = files
+def process(files): 
+    targets = []
     images = []
- 
-    for name in files:
-        with open(name, "rb") as f:
-            images.append( makearray(list(f.read())) )
 
     # User input whether to make images or not. Defaults to no
-    """
-    choice = int(ui.prompt("Create images? (1)yes (2)no"))
-    if choice != 1:
-        pass
-    else:
-        pass
-    """
+    choice = int(ui.prompt("(1)Load (2)Create"))
+    if choice == 1:
+        for name in files:
+            if ".bmp" name[-3:]:
+                with open(name, "rb") as f:
+                    images.append( makearray(list(f.read())) )
 
     targets = [name.split('/')[-1][:5] for name in targets]
     return images, targets
