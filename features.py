@@ -54,6 +54,7 @@ def describe_keypoints(img, alg, vector_size, descriptor_size, display=False):
     return dsc
 
 def features(images):
+    """Loop through images, extracting desired features"""
     options = ["ORB", "SIFT", "LBP", "Gabor", "Entropy"]
     res = ui.prompt("Choose a feature selection algorithm:", options)
     type = options[int(res)]
