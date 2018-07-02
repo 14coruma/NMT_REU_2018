@@ -3,7 +3,6 @@ import numpy as np
 
 import cv2 # (ORB, SIFT, cvtColor(grey))
 from scipy import ndimage as nd # For convolving kernel
-from skimage.color import gray2rgb # For conversion gray -> rgb
 from skimage import exposure # For creating histogram
 from skimage.util import img_as_float # Needed for gabor filter
 from skimage.feature import local_binary_pattern
