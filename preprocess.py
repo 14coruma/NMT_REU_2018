@@ -4,7 +4,9 @@ import scipy.misc as smp # Required to export original png
 import numpy as np
 import math # Aids "length" variable
 import multiprocessing as mp # PARALELL PROCESSING
+import os
 import time
+from tqdm import tqdm
 
 def getdims(f):
     size = len(f) * .001
@@ -36,27 +38,47 @@ def makearray(f):
 
 def makeimage(name, f):
     img = smp.toimage(f)
-    smp.imsave(name+"(original).png", img)
+    smp.imsave(name+"(original).bmp", img)
 
-def process(files): 
-    start = time.time()
+def load(files):
     targets = []
     images = []
+    for item in files:
+        targets.append(item)
+        with open(item, "rb") as f:
+            images.append( makearray(list(f.read())) )
+    return targets, images
 
-    # User input whether to make images or not. Defaults to no
+def create(files):
+    targets = []
+    images = []
+    for item in files:
+        targets.append(item)
+        with open(item, "rb") as f:
+            images.append( makearray(list(f.read())) )
+            makeimage(item, images[-1])
+    return targets, images
+
+def process(directory): 
+    files = []
+
     choice = int(ui.prompt("(1)Load (2)Create"))
-    for name in files:
-        with open(name, "rb") as f:
-            if choice == 1 and ".bmp" in name[-4:]:
-                targets.append(name)
-                images.append( makearray(list(f.read())) )
-            elif choice == 2 and ".file" in name[-5:]:
-                targets.append(name)
-                images.append( makearray(list(f.read())) )
-                makeimage(name, images[-1])
+    if choice == 1:
+        for item in os.listdir(directory):
+            if( os.path.isfile(os.path.join(directory, item)) and
+            item.endswith(".bmp") ):
+                files.append(os.path.join(directory, item))
+        targets, images = load(files)
 
-    end = time.time()
-    print("{} files in {} seconds".format(len(files), end-start))
+    elif choice == 2:
+        for item in os.listdir(directory):
+            if( os.path.isfile(os.path.join(directory, item)) and
+            (item.endswith(".pdf") or item.endswith(".file")) ):
+                files.append(os.path.join(directory, item))
+        targets, images = create(files)
+
+    else:
+        quit()
+    
     targets = [name.split('/')[-1][:5] for name in targets]
     return images, targets
-
