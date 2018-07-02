@@ -2,8 +2,6 @@
 import numpy as np
 
 import cv2 # (ORB, SIFT, cvtColor(grey))
-from skimage import io # Load image from file
-
 from scipy import ndimage as nd # For convolving kernel
 from skimage import exposure # For creating histogram
 from skimage.util import img_as_float # Needed for gabor filter
@@ -60,9 +58,6 @@ def features(images):
     res = ui.prompt("Choose a feature selection algorithm:", options)
     type = options[int(res)]
 
-    # Load image for testing. TODO: Remove this line
-    images.append(io.imread("../NMT_REU/data/small/CLEAN_06cofigfs.file.bmp"))
-
     data = []
     for img in pb.progressbar(images): # Process each image
         if type == "ORB":              # Corner features
@@ -100,5 +95,4 @@ def features(images):
             print("ERROR: Invalid feature extraction method")
             return 1
 
-    print(data[0])
     return data
