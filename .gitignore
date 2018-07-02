@@ -1,6 +1,8 @@
 # Hide data
 data
 old_preprocess.py
+old_preprocess
+test
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
