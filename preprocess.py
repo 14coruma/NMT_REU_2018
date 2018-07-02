@@ -45,17 +45,22 @@ def makearray(f):
 
     return data
 
+def makeimage(f):
+    img = smp.toimage(makearray(f))
+    smp.imsave(pdf[0]+"(original).png", img)
+
 def process(files): 
     targets = []
     images = []
 
     # User input whether to make images or not. Defaults to no
     choice = int(ui.prompt("(1)Load (2)Create"))
-    if choice == 1:
-        for name in files:
-            if ".bmp" name[-3:]:
-                with open(name, "rb") as f:
-                    images.append( makearray(list(f.read())) )
+    for name in files:
+        with open(name, "rb") as f:
+            if choice == 1 and ".bmp" in name[-3:]:
+                images.append( makearray(list(f.read())) )
+            elif choice == 2 and ".pdf" in name[-3:]:
+                images.append( makearray(list(f.read())) )
 
     targets = [name.split('/')[-1][:5] for name in targets]
     return images, targets
