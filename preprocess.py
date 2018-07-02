@@ -12,7 +12,6 @@ def getdims(f):
     @return (width, height, filesize(bytes).
     """
     size = len(f) * .001
-    print("size:", size)
     # width
     # TODO: make this prettier
     if (size <= 10):
@@ -32,7 +31,6 @@ def getdims(f):
     else:
         width = 1024
 
-    print("width:", width)
     # (height, width) 
     return (width, math.ceil(size*1000 // width)+ 1)
 
@@ -68,7 +66,6 @@ def process(files):
                 images.append( makearray(list(f.read())) )
                 makeimage(name, images[-1])
 
-    print(images)
     targets = [name.split('/')[-1][:5] for name in targets]
     return images, targets
 
