@@ -11,7 +11,8 @@ def getdims(f):
     @param f is the file.
     @return (width, height, filesize(bytes).
     """
-    size = len(f)
+    size = len(f) * .001
+    print("size:", size)
     # width
     # TODO: make this prettier
     if (size <= 10):
@@ -31,6 +32,7 @@ def getdims(f):
     else:
         width = 1024
 
+    print("width:", width)
     # (height, width) 
     return (width, math.ceil(size*1000 // width)+ 1)
 
@@ -42,16 +44,13 @@ def makearray(f):
     data = np.array(f)
     data = np.pad(
         data, (0, dimensions[0]-(len(data)%dimensions[0])), 'constant')
-    data = np.reshape(data, (dimensions[0], -1))
+    data = np.reshape(data, (-1, dimensions[0]))
 
     return data
 
 def makeimage(name, f):
-    data = makearray(f)
-    img = smp.toimage(data)
+    img = smp.toimage(f)
     smp.imsave(name+"(original).png", img)
-
-    return data
 
 def process(files): 
     targets = []
@@ -62,10 +61,14 @@ def process(files):
     for name in files:
         with open(name, "rb") as f:
             if choice == 1 and ".bmp" in name[-4:]:
+                targets.append(name)
                 images.append( makearray(list(f.read())) )
             elif choice == 2 and ".file" in name[-5:]:
-                images.append( makeimage(name, list(f.read())) )
+                targets.append(name)
+                images.append( makearray(list(f.read())) )
+                makeimage(name, images[-1])
 
+    print(images)
     targets = [name.split('/')[-1][:5] for name in targets]
     return images, targets
 
