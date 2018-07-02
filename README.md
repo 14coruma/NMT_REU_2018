@@ -1,2 +1,2 @@
-# reu
-r8 8/8 bomb reu dank project boiiiii
+# PDF Malware Analysis Using Image Processing Techniques
+By Donovan Jenkins and Andrew Corum
