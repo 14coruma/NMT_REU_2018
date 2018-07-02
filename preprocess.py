@@ -1,5 +1,9 @@
-def main():
-    print("hi")
 
-if __name__ == "__main__":
-    main()
+#!/usr/bin/python3
+
+def process():
+    images = []
+    targets = []
+    return images, targets
+
+
