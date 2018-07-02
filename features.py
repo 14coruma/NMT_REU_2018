@@ -3,6 +3,7 @@ import numpy as np
 
 import cv2 # (ORB, SIFT, cvtColor(grey))
 from scipy import ndimage as nd # For convolving kernel
+from skimage.color import gray2rgb # For conversion gray -> rgb
 from skimage import exposure # For creating histogram
 from skimage.util import img_as_float # Needed for gabor filter
 from skimage.feature import local_binary_pattern
@@ -41,7 +42,9 @@ def describe_keypoints(img, alg, vector_size, descriptor_size, display=False):
 
     # Get first sorted <vector_size> points.
     kps = sorted(kps, key=lambda x: x.response)[:vector_size]
-    kps, dsc = alg.compute(img, kps)
+    dsc = np.zeros((2, 2))
+    if len(kps) > 0: # Don't compute if no keypoints were found
+        kps, dsc = alg.compute(img, kps)
 
     # Fill with zeros if no keypoints are found
     if len(kps) < vector_size:
@@ -61,6 +64,7 @@ def features(images):
 
     data = []
     for img in pb.progressbar(images): # Process each image
+        img = img.astype(np.uint8)
         if type == "ORB":              # Corner features
             alg = cv2.ORB_create()
             vector_size = 32
@@ -69,27 +73,25 @@ def features(images):
         elif type == "SIFT":           # Corner features (patented)
             alg = cv2.xfeatures2d.SIFT_create()
             vector_size = 32
-            descriptor_size = 32
+            descriptor_size = 128
             data.append(describe_keypoints(img, alg, vector_size, descriptor_size))
         elif type == "LBP":
             points = 32
             radius = 16
-            grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            lbp = local_binary_pattern(grey, points, radius, method="uniform")
+            lbp = local_binary_pattern(img, points, radius, method="uniform")
             hist = np.array(exposure.histogram(lbp, nbins=16)[0])
             hist = np.divide(hist, sum(hist)) # Normalize histogram
             data.append(hist)
         elif type == "Gabor":
             # prepare filter bank kernels
             kernels = create_gabor_kernels()
-            float_img = img_as_float(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
+            float_img = img_as_float(img)
             feats = compute_feats(float_img, kernels).flatten()
             hist = exposure.histogram(float_img, nbins=16)
             data.append(np.append(feats, hist))
         elif type == "Entropy":
-            grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            grey = entropy(grey, disk(5))
-            hist = exposure.histogram(grey, nbins=16)[0]
+            img = entropy(img, disk(5))
+            hist = exposure.histogram(img, nbins=16)[0]
             hist = np.divide(hist, sum(hist)) # Normalize histogram
             data.append(hist)
         else:
