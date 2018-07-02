@@ -1,8 +1,11 @@
 #!/usr/bin/python3
 import numpy as np
 
-import cv2
-from skimage import io
+import cv2 # (ORB, SIFT, cvtColor(grey))
+from skimage import io # Load image from file
+
+from skimage import exposure # For creating histogram
+from skimage.feature import local_binary_pattern
 
 import ui # ui.prompt() 
 import progressbar as pb # Display progressbar
@@ -46,6 +49,14 @@ def features(images):
             vector_size = 32
             descriptor_size = 32
             data.append(describe_keypoints(img, alg, vector_size, descriptor_size))
+        elif type == "LBP":
+            points = 32
+            radius = 16
+            grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            lbp = local_binary_pattern(grey, points, radius, method="uniform")
+            hist = np.array(exposure.histogram(lbp, nbins=16)[0])
+            hist = np.divide(hist, sum(hist)) # Normalize histogram
+            data.append(hist)
         else:
             print("ERROR: Type " + type + " not found (features.extract_features())\n")
             return 1
