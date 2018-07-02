@@ -9,6 +9,8 @@ from skimage import exposure # For creating histogram
 from skimage.util import img_as_float # Needed for gabor filter
 from skimage.feature import local_binary_pattern
 from skimage.filters import gabor_kernel
+from skimage.filters.rank import entropy
+from skimage.morphology import disk # Create a disk around a pixel (for entropy)
 
 import ui # ui.prompt() 
 import progressbar as pb # Display progressbar
@@ -88,8 +90,14 @@ def features(images):
             feats = compute_feats(float_img, kernels).flatten()
             hist = exposure.histogram(float_img, nbins=16)
             data.append(np.append(feats, hist))
+        elif type == "Entropy":
+            grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            grey = entropy(grey, disk(5))
+            hist = exposure.histogram(grey, nbins=16)[0]
+            hist = np.divide(hist, sum(hist)) # Normalize histogram
+            data.append(hist)
         else:
-            print("ERROR: Type " + type + " not found (features.extract_features())\n")
+            print("ERROR: Invalid feature extraction method")
             return 1
 
     print(data[0])
