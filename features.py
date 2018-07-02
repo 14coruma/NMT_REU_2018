@@ -4,11 +4,35 @@ import numpy as np
 import cv2 # (ORB, SIFT, cvtColor(grey))
 from skimage import io # Load image from file
 
+from scipy import ndimage as nd # For convolving kernel
 from skimage import exposure # For creating histogram
+from skimage.util import img_as_float # Needed for gabor filter
 from skimage.feature import local_binary_pattern
+from skimage.filters import gabor_kernel
 
 import ui # ui.prompt() 
 import progressbar as pb # Display progressbar
+
+def create_gabor_kernels(n_theta=4):
+    """Generate gabor kernles"""
+    kernels = []
+    for theta in range(n_theta):
+        theta = theta / 8. * np.pi
+        for sigma in (1, 3):
+            for frequency in (0.05, 0.25):
+                kernel = np.real(gabor_kernel(frequency, theta=theta,
+                                              sigma_x=sigma, sigma_y=sigma))
+                kernels.append(kernel)
+    return kernels
+
+def compute_feats(image, kernels):
+    """Create feature vector from gabor kernels and image"""
+    feats = np.zeros((len(kernels), 2), dtype=np.double)
+    for k, kernel in enumerate(kernels):
+        filtered = nd.convolve(image, kernel, mode='wrap')
+        feats[k, 0] = filtered.mean()
+        feats[k, 1] = filtered.var()
+    return feats
 
 def describe_keypoints(img, alg, vector_size, descriptor_size, display=False):
     """Create description vector for keypoints in an image"""
@@ -30,7 +54,7 @@ def describe_keypoints(img, alg, vector_size, descriptor_size, display=False):
     return dsc
 
 def features(images):
-    options = ["ORB", "SIFT", "LBP", "Gabor", "Entropy", "LBP and Entropy"]
+    options = ["ORB", "SIFT", "LBP", "Gabor", "Entropy"]
     res = ui.prompt("Choose a feature selection algorithm:", options)
     type = options[int(res)]
 
@@ -57,8 +81,16 @@ def features(images):
             hist = np.array(exposure.histogram(lbp, nbins=16)[0])
             hist = np.divide(hist, sum(hist)) # Normalize histogram
             data.append(hist)
+        elif type == "Gabor":
+            # prepare filter bank kernels
+            kernels = create_gabor_kernels()
+            float_img = img_as_float(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
+            feats = compute_feats(float_img, kernels).flatten()
+            hist = exposure.histogram(float_img, nbins=16)
+            data.append(np.append(feats, hist))
         else:
             print("ERROR: Type " + type + " not found (features.extract_features())\n")
             return 1
 
+    print(data[0])
     return data
