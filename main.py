@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
-import preprocess as pproc
 import sys
+
+import preprocess as pproc
 import features as ft
 import trainer as tr
 import ui
