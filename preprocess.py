@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import ui
+import scipy.misc as smp # Required to export original png
 import numpy as np
 import math # Aids "length" variable
 import multiprocessing as mp # PARALELL PROCESSING
@@ -10,7 +11,7 @@ def getdims(f):
     @param f is the file.
     @return (width, height, filesize(bytes).
     """
-    size = len(f)
+    size = len(f) * .001
     # width
     # TODO: make this prettier
     if (size <= 10):
@@ -30,8 +31,8 @@ def getdims(f):
     else:
         width = 1024
 
-    # (width, height) 
-    return (width, math.ceil(size*1000 // width)+ 1 )
+    # (height, width) 
+    return (width, math.ceil(size*1000 // width)+ 1)
 
 
 def makearray(f):
@@ -45,22 +46,25 @@ def makearray(f):
 
     return data
 
-def process(files):
-    targets = files
+def makeimage(name, f):
+    img = smp.toimage(f)
+    smp.imsave(name+"(original).png", img)
+
+def process(files): 
+    targets = []
     images = []
- 
-    for name in files:
-        with open(name, "rb") as f:
-            images.append( makearray(list(f.read())) )
 
     # User input whether to make images or not. Defaults to no
-    """
-    choice = int(ui.prompt("Create images? (1)yes (2)no"))
-    if choice != 1:
-        pass
-    else:
-        pass
-    """
+    choice = int(ui.prompt("(1)Load (2)Create"))
+    for name in files:
+        with open(name, "rb") as f:
+            if choice == 1 and ".bmp" in name[-4:]:
+                targets.append(name)
+                images.append( makearray(list(f.read())) )
+            elif choice == 2 and ".file" in name[-5:]:
+                targets.append(name)
+                images.append( makearray(list(f.read())) )
+                makeimage(name, images[-1])
 
     targets = [name.split('/')[-1][:5] for name in targets]
     return images, targets
