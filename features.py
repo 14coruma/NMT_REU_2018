@@ -108,6 +108,7 @@ def features(images):
     fn = switch.get(int(res))
 
     # Run this with a pool of 5 agents until finished
+    print("Please wait...\n")
     with Pool(processes=4) as pool:
         data = pool.map(fn, images, 16)
 
