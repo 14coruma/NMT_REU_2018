@@ -91,7 +91,7 @@ def extract_Entropy(img):
     img = img.astype(np.uint8)
     img = entropy(img, disk(5))
     hist = exposure.histogram(img, nbins=16)[0]
-    hist = np.divide(hist, sum(hist)) # Normalize histogram
+    #hist = np.divide(hist, sum(hist)) # Normalize histogram
     return hist
 
 def features(images):
