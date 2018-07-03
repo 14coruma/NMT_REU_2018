@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 import ui
-import scipy.misc as smp # Required to export original png
-import numpy as np
+import scipy.misc as smp # Required to export original png import numpy as np
 import math # Aids "length" variable
+import numpy as np
 import multiprocessing as mp # PARALELL PROCESSING
 import os
 import time

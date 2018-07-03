@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
-import preprocess as pproc
 import sys
-#import features as ft
-#import trainer as tr
+
+import preprocess as pproc
+import features as ft
+import trainer as tr
 import ui
 
 def main():

@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import numpy as np
+from multiprocessing import Pool
 
 import cv2 # (ORB, SIFT, cvtColor(grey))
 from scipy import ndimage as nd # For convolving kernel
@@ -55,46 +56,61 @@ def describe_keypoints(img, alg, vector_size, descriptor_size, display=False):
 
     return dsc
 
+def extract_ORB(img):    
+    img = img.astype(np.uint8)
+    alg = cv2.ORB_create()
+    vector_size = 32
+    descriptor_size = 32
+    return describe_keypoints(img, alg, vector_size, descriptor_size)
+
+def extract_SIFT(img):
+    img = img.astype(np.uint8)
+    alg = cv2.xfeatures2d.SIFT_create()
+    vector_size = 32
+    descriptor_size = 128
+    return describe_keypoints(img, alg, vector_size, descriptor_size)
+
+def extract_LBP(img):
+    img = img.astype(np.uint8)
+    points = 32
+    radius = 16
+    lbp = local_binary_pattern(img, points, radius, method="uniform")
+    hist = np.array(exposure.histogram(lbp, nbins=16)[0])
+    hist = np.divide(hist, sum(hist)) # Normalize histogram
+    return hist
+
+def extract_Gabor(img):
+    img = img.astype(np.uint8)
+    kernels = create_gabor_kernels()
+    float_img = img_as_float(img)
+    feats = compute_feats(float_img, kernels).flatten()
+    hist = exposure.histogram(float_img, nbins=16)
+    return np.append(feats, hist)
+
+def extract_Entropy(img):
+    img = img.astype(np.uint8)
+    img = entropy(img, disk(5))
+    hist = exposure.histogram(img, nbins=16)[0]
+    #hist = np.divide(hist, sum(hist)) # Normalize histogram
+    return hist
+
 def features(images):
     """Loop through images, extracting desired features"""
     options = ["ORB", "SIFT", "LBP", "Gabor", "Entropy"]
     res = ui.prompt("Choose a feature selection algorithm:", options)
-    type = options[int(res)]
+    switch = {
+        0: extract_ORB,
+        1: extract_SIFT,
+        2: extract_LBP,
+        3: extract_Gabor,
+        4: extract_Entropy,
+    }
+    fn = switch.get(int(res))
 
-    data = []
-    for img in pb.progressbar(images): # Process each image
-        img = img.astype(np.uint8)
-        if type == "ORB":              # Corner features
-            alg = cv2.ORB_create()
-            vector_size = 32
-            descriptor_size = 32
-            data.append(describe_keypoints(img, alg, vector_size, descriptor_size))
-        elif type == "SIFT":           # Corner features (patented)
-            alg = cv2.xfeatures2d.SIFT_create()
-            vector_size = 32
-            descriptor_size = 128
-            data.append(describe_keypoints(img, alg, vector_size, descriptor_size))
-        elif type == "LBP":
-            points = 32
-            radius = 16
-            lbp = local_binary_pattern(img, points, radius, method="uniform")
-            hist = np.array(exposure.histogram(lbp, nbins=16)[0])
-            hist = np.divide(hist, sum(hist)) # Normalize histogram
-            data.append(hist)
-        elif type == "Gabor":
-            # prepare filter bank kernels
-            kernels = create_gabor_kernels()
-            float_img = img_as_float(img)
-            feats = compute_feats(float_img, kernels).flatten()
-            hist = exposure.histogram(float_img, nbins=16)
-            data.append(np.append(feats, hist))
-        elif type == "Entropy":
-            img = entropy(img, disk(5))
-            hist = exposure.histogram(img, nbins=16)[0]
-            hist = np.divide(hist, sum(hist)) # Normalize histogram
-            data.append(hist)
-        else:
-            print("ERROR: Invalid feature extraction method")
-            return 1
+    # Run this with a pool of 5 agents until finished
+    print("Should take less than {} minutes.".format(len(images)/500))
+    print("Please wait...\n")
+    with Pool(processes=4) as pool:
+        data = pool.map(fn, images, 16)
 
-    return data
+    return data 
