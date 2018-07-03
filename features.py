@@ -87,11 +87,12 @@ def features(images):
             float_img = img_as_float(img)
             feats = compute_feats(float_img, kernels).flatten()
             hist = exposure.histogram(float_img, nbins=16)
+            # hist = np.divide(hist, sum(hist)) # Normalize histogram
             data.append(np.append(feats, hist))
         elif type == "Entropy":
             img = entropy(img, disk(5))
             hist = exposure.histogram(img, nbins=16)[0]
-            hist = np.divide(hist, sum(hist)) # Normalize histogram
+            # hist = np.divide(hist, sum(hist)) # Normalize histogram
             data.append(hist)
         else:
             print("ERROR: Invalid feature extraction method")
