@@ -21,11 +21,11 @@ def main():
             tr.train(data, targets)
             
             options = ["Try another model", "Extract new features", "Quit"]
-            res = ui.prompt(options=options)
-            if options[int(res)] == "Quit":
+            res = options[int(ui.prompt(options=options))]
+            if res == "Quit":
                 doneTraining = True
                 doneExtracting = True
-            elif options[int(res)] == "Extract new features":
+            elif res == "Extract new features":
                 doneTraining = True
     
 if __name__ == "__main__":
