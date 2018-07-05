@@ -45,8 +45,7 @@ def load(files):
     images = []
     for item in files:
         targets.append(item)
-        with open(item, "rb") as f:
-            images.append( makearray(list(f.read())) )
+        images.append(smp.imread(item))
     return targets, images
 
 def create(files):
