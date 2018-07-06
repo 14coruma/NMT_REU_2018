@@ -17,9 +17,9 @@ def train(data, targets):
             "Decision Tree Classifier", "KNN"]
     res = ui.prompt("Choose a ML algorithm:", options)
     switch = {
-        0: svm.SVC(C=100.),
-        1: RandomForestClassifier(max_depth=2),
-        2: DecisionTreeClassifier(),
+        0: svm.SVC(C=100., random_state=0),
+        1: RandomForestClassifier(max_depth=3, random_state=0),
+        2: DecisionTreeClassifier(random_state=0),
         3: KNeighborsClassifier()
     }
     clf = switch.get(int(res))
