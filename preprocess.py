@@ -3,10 +3,11 @@ import ui
 import numpy as np
 import scipy.misc as smp # Required to export original png import numpy as np
 import math # Aids "length" variable import numpy as np
-import multiprocessing as mp # PARALELL PROCESSING
+import multiprocessing as mp # PARALELL PROCESSING import os
 import os
 import time
 from tqdm import tqdm
+import progressbar as pb
 
 import gc
 
@@ -55,11 +56,12 @@ def create(files):
     pageNames = []
     pageSize = 1000
     pages = range(math.ceil(len(files)/pageSize))
+    print("Number of pages: {}".format(len(pages)))
     for page in pages:
         images = []
         gc.collect() # Garbage collect
         start = page*pageSize
-        for item in files[start:start+pageSize]:
+        for item in pb.progressbar(files[start:start+pageSize]):
             targets.append(item)
             with open(item, "rb") as f:
                 images.append( makearray(list(f.read())) )

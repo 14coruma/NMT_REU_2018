@@ -113,7 +113,7 @@ def features(pageNames):
 
     # Run this with a pool of 5 agents until finished
     data = []
-    for pageName in pageNames:
+    for pageName in pb.progressbar(pageNames):
         gc.collect()
         images = np.load(pageName)
         with Pool(processes=3) as pool:
