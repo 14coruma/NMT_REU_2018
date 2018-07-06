@@ -45,19 +45,28 @@ def makeimage(name, f):
 
 def load(files):
     targets = []
-    images = []
-    for item in files:
-        targets.append(item)
-        images.append(smp.imread(item))
-    return targets, images
+    pageNames = []
+    pageSize = 1000
+    pages = range(math.ceil(len(files)/pageSize))
+    for page in pages:
+        print("\nPage {}/{}".format(page+1, len(pages)))
+        images = []
+        gc.collect() # Garbage collect
+        start = page*pageSize
+        for item in pb.progressbar(files[start:start+pageSize]):
+            targets.append(item)
+            images.append(smp.imread(item))
+        pageNames.append("./pages/images_page{}.npy".format(page))
+        np.save(pageNames[-1], images)
+    return targets, pageNames 
 
 def create(files):
     targets = []
     pageNames = []
     pageSize = 1000
     pages = range(math.ceil(len(files)/pageSize))
-    print("Number of pages: {}".format(len(pages)))
     for page in pages:
+        print("\nPage {}/{}".format(page+1, len(pages)))
         images = []
         gc.collect() # Garbage collect
         start = page*pageSize
@@ -80,7 +89,7 @@ def process(directory):
             if( os.path.isfile(os.path.join(directory, item)) and
             item.endswith(".bmp") ):
                 files.append(os.path.join(directory, item))
-        targets, images = load(files)
+        targets, pageNames = load(files)
 
     elif choice == 1:
         for item in os.listdir(directory):
