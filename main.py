@@ -8,12 +8,12 @@ import trainer as tr
 import ui
 
 def main():
-    images, targets = pproc.process(sys.argv[1])
+    pageNames, targets = pproc.process(sys.argv[1])
 
     # Extract features (until user quits)
     doneExtracting = False
     while not doneExtracting:
-        data = ft.features(images)
+        data = ft.features(pageNames)
 
         # Create and evaluate model (until user quits)
         doneTraining = False
