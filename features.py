@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import numpy as np
+import gc
 from multiprocessing import Pool
 
 import cv2 # (ORB, SIFT, cvtColor(grey))
@@ -94,7 +95,7 @@ def extract_Entropy(img):
     #hist = np.divide(hist, sum(hist)) # Normalize histogram
     return hist
 
-def features(images):
+def features(pageNames):
     """Loop through images, extracting desired features"""
     options = ["ORB", "SIFT", "LBP", "Gabor", "Entropy"]
     res = ui.prompt("Choose a feature selection algorithm:", options)
@@ -107,10 +108,19 @@ def features(images):
     }
     fn = switch.get(int(res))
 
-    # Run this with a pool of 5 agents until finished
-    print("Should take less than {} minutes.".format(len(images)/500))
+    print("Should take less than {} minutes.".format(len(pageNames)*2))
     print("Please wait...\n")
-    with Pool(processes=4) as pool:
-        data = pool.map(fn, images, 16)
 
+    # Run this with a pool of 5 agents until finished
+    data = []
+    for pageName in pageNames:
+        gc.collect()
+        images = np.load(pageName)
+        with Pool(processes=3) as pool:
+            if len(data) == 0:
+                data = pool.map(fn, images, 16)
+            else:
+                data = np.concatenate((data, pool.map(fn, images, 16)))
+
+    print(len(data))
     return data 

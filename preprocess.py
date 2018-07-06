@@ -1,12 +1,14 @@
 #!/usr/bin/python3
 import ui
-import scipy.misc as smp # Required to export original png import numpy as np
-import math # Aids "length" variable
 import numpy as np
+import scipy.misc as smp # Required to export original png import numpy as np
+import math # Aids "length" variable import numpy as np
 import multiprocessing as mp # PARALELL PROCESSING
 import os
 import time
 from tqdm import tqdm
+
+import gc
 
 def getdims(f):
     size = len(f) * .001
@@ -50,34 +52,43 @@ def load(files):
 
 def create(files):
     targets = []
-    images = []
-    for item in files:
-        targets.append(item)
-        with open(item, "rb") as f:
-            images.append( makearray(list(f.read())) )
-            makeimage(item, images[-1])
-    return targets, images
+    pageNames = []
+    pageSize = 1000
+    pages = range(math.ceil(len(files)/pageSize))
+    for page in pages:
+        images = []
+        gc.collect() # Garbage collect
+        start = page*pageSize
+        for item in files[start:start+pageSize]:
+            targets.append(item)
+            with open(item, "rb") as f:
+                images.append( makearray(list(f.read())) )
+                makeimage(item, images[-1])
+        pageNames.append("./pages/images_page{}.npy".format(page))
+        np.save(pageNames[-1], images)
+    return targets, pageNames
 
 def process(directory): 
     files = []
 
-    choice = int(ui.prompt("(1)Load (2)Create"))
-    if choice == 1:
+    options = ["Load", "Create"]
+    choice = int(ui.prompt(options=options))
+    if choice == 0:
         for item in os.listdir(directory):
             if( os.path.isfile(os.path.join(directory, item)) and
             item.endswith(".bmp") ):
                 files.append(os.path.join(directory, item))
         targets, images = load(files)
 
-    elif choice == 2:
+    elif choice == 1:
         for item in os.listdir(directory):
             if( os.path.isfile(os.path.join(directory, item)) and
             (item.endswith(".pdf") or item.endswith(".file")) ):
                 files.append(os.path.join(directory, item))
-        targets, images = create(files)
+        targets, pageNames = create(files)
 
     else:
         quit()
     
     targets = [name.split('/')[-1][:5] for name in targets]
-    return images, targets
+    return pageNames, targets
