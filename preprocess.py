@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 import ui
 import numpy as np
-import scipy.misc as smp # Required to export image
+#import scipy.misc as smp # Required to export image
+from skimage import io
 import math # Aids "length" variable
 import multiprocessing as mp # PARALELL PROCESSING
 import os
@@ -32,19 +33,6 @@ def getDims(f):
     else:
         width = 1024
     return (width, math.ceil(size*1000 // width)+ 1)
-
-def buildImages(files, targets, type):
-    """Builds mages from array of filenames. Returns (images, targets)"""
-    images = []
-    for file in pb.progressbar(files):
-        targets.append(file)
-        with open(file, "rb") as f:
-            if type == "Byte":
-                images.append(bytePlot(list(f.read())))
-            else:
-                images.append(markovPlot(list(f.read())))
-            smp.imsave("{}.bmp".format(file), images[-1])
-    return images, targets
 
 def bytePlot(f):
     """Creates byte plot from byte array. Returns image array"""
@@ -81,26 +69,29 @@ def markovPlot(f):
     
     return img.astype(np.uint8)
 
-def load(files):
-    """Loads images from saved file"""
-    targets = []
-    pageNames = []
-    pageSize = 1000
-    pages = range(math.ceil(len(files)/pageSize))
-    for page in pages:
-        print("\nPage {}/{}".format(page+1, len(pages)))
-        images = []
-        gc.collect() # Garbage collect
-        start = page*pageSize
-        for item in pb.progressbar(files[start:start+pageSize]):
-            targets.append(item)
-            images.append(smp.imread(item))
-        pageNames.append("./pages/images_page{}.npy".format(page))
-        np.save(pageNames[-1], images)
-    return targets, pageNames 
+def buildImages(files, targets, type):
+    """Builds mages from array of filenames. Returns (images, targets)"""
+    images = []
+    for file in pb.progressbar(files):
+        targets.append(file)
+        with open(file, "rb") as f:
+            if type == "Byte":
+                images.append(bytePlot(list(f.read())))
+            elif type == "Markov":
+                images.append(markovPlot(list(f.read())))
+            io.imsave("{}.bmp".format(file), images[-1])
+    return images, targets
 
-def create(files):
-    """Creates images from pdf file"""
+def loadImages(files, targets):
+    """Loads an array of bmp images. Returns (images, targets)"""
+    images = []
+    for file in pb.progressbar(files):
+        targets.append(file)
+        images.append(io.imread(file, as_gray=True))
+    return images, targets
+
+def imagePages(files, choice):
+    """Pages images into npy file in groups of 1000"""
     options = ["Byte", "Markov"]
     type = options[int(ui.prompt("Choose a visualization type", options))]
 
@@ -111,8 +102,13 @@ def create(files):
     for page in pages:
         print("\nPage {}/{}".format(page+1, len(pages)))
         gc.collect() # Garbage collect
+
+        images = []
         start = page*pageSize
-        images, targets = buildImages(files[start:start+pageSize], targets, type)
+        if choice == "Create":
+            images, targets = buildImages(files[start:start+pageSize], targets, type)
+        elif choice == "Load":
+            images, targets = loadImages(files[start:start+pageSize], targets)
         pageNames.append("./pages/images_page{}.npy".format(page))
         np.save(pageNames[-1], images)
     return targets, pageNames
@@ -124,22 +120,15 @@ def process(directory):
     options = ["Load", "Create"]
     choice = options[int(ui.prompt(options=options))]
 
-    if choice == "Load":
-        for item in os.listdir(directory):
-            if( os.path.isfile(os.path.join(directory, item)) and
-            item.endswith(".bmp") ):
-                files.append(os.path.join(directory, item))
-        targets, pageNames = load(files)
+    for item in os.listdir(directory):
+        if os.path.isfile(os.path.join(directory, item)):
+            filename = os.path.join(directory, item)
+            if choice == "Load" and item.endswith(".bmp"):
+                files.append(filename)
+            elif choice == "Create" and item.endswith(".file"):
+                files.append(filename)
 
-    elif choice == "Create":
-        for item in os.listdir(directory):
-            if( os.path.isfile(os.path.join(directory, item)) and
-            (item.endswith(".pdf") or item.endswith(".file")) ):
-                files.append(os.path.join(directory, item))
-        targets, pageNames = create(files)
-
-    else:
-        quit()
+    targets, pageNames = imagePages(files, choice)
     
     targets = [name.split('/')[-1][:5] for name in targets]
     return pageNames, targets
