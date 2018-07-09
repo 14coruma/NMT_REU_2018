@@ -8,6 +8,7 @@ import os
 import time
 from tqdm import tqdm
 import progressbar as pb
+from math import isinf
 
 import gc
 
@@ -39,9 +40,34 @@ def buildImages(files, targets, type):
             if type == "Byte":
                 images.append(bytePlot(list(f.read())))
             else:
-                print("Invalid Type")
+                images.append(markovPlot(list(f.read())))
             makeimage(file, images[-1])
     return images, targets
+
+def markovPlot(f):
+    p = np.zeros(shape=(256, 256))
+    for i in range(len(f)-1):
+        row = f[i]
+        col = f[i+1]
+        p[row, col] += 1
+
+    for row in range(256):
+        sum = np.sum(p[row])
+        if sum != 0:
+            p[row] /= sum
+
+    # Normalize
+    p = (1 / np.ndarray.max(p)) * p
+    p *= 255
+
+    img = np.zeros(shape=(256, 256))
+    for row in range(256):
+        for col in range(256):
+            val = p[row, col]
+            val = val if not isinf(val) else 0
+            img[row, col] = val
+    
+    return img.astype(np.uint8)
 
 def bytePlot(f):
     dimensions = getdims(f)
