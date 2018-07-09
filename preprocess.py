@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 import ui
 import numpy as np
-import scipy.misc as smp # Required to export original png import numpy as np
-import math # Aids "length" variable import numpy as np
-import multiprocessing as mp # PARALELL PROCESSING import os
+import scipy.misc as smp # Required to export image
+import math # Aids "length" variable
+import multiprocessing as mp # PARALELL PROCESSING
 import os
 import time
 from tqdm import tqdm
@@ -12,7 +12,8 @@ from math import isinf
 
 import gc
 
-def getdims(f):
+def getDims(f):
+    """Returns (width, height) of byte plot image"""
     size = len(f) * .001
     if (size <= 10):
         width = 32
@@ -33,6 +34,7 @@ def getdims(f):
     return (width, math.ceil(size*1000 // width)+ 1)
 
 def buildImages(files, targets, type):
+    """Builds mages from array of filenames. Returns (images, targets)"""
     images = []
     for file in pb.progressbar(files):
         targets.append(file)
@@ -41,10 +43,20 @@ def buildImages(files, targets, type):
                 images.append(bytePlot(list(f.read())))
             else:
                 images.append(markovPlot(list(f.read())))
-            makeimage(file, images[-1])
+            smp.imsave("{}.bmp".format(file), images[-1])
     return images, targets
 
+def bytePlot(f):
+    """Creates byte plot from byte array. Returns image array"""
+    dimensions = getDims(f)
+    data = np.array(f)
+    data = np.pad(
+        data, (0, dimensions[0]-(len(data)%dimensions[0])), 'constant')
+    data = np.reshape(data, (-1, dimensions[0]))
+    return data
+
 def markovPlot(f):
+    """Creates markov plot from byte array. Returns image array"""
     p = np.zeros(shape=(256, 256))
     for i in range(len(f)-1):
         row = f[i]
@@ -69,19 +81,8 @@ def markovPlot(f):
     
     return img.astype(np.uint8)
 
-def bytePlot(f):
-    dimensions = getdims(f)
-    data = np.array(f)
-    data = np.pad(
-        data, (0, dimensions[0]-(len(data)%dimensions[0])), 'constant')
-    data = np.reshape(data, (-1, dimensions[0]))
-    return data
-
-def makeimage(name, f):
-    img = smp.toimage(f)
-    smp.imsave(name+"(original).bmp", img)
-
 def load(files):
+    """Loads images from saved file"""
     targets = []
     pageNames = []
     pageSize = 1000
@@ -99,6 +100,7 @@ def load(files):
     return targets, pageNames 
 
 def create(files):
+    """Creates images from pdf file"""
     options = ["Byte", "Markov"]
     type = options[int(ui.prompt("Choose a visualization type", options))]
 
@@ -116,6 +118,7 @@ def create(files):
     return targets, pageNames
 
 def process(directory): 
+    """Process each file in a directory, saving or loading images as directed"""
     files = []
 
     options = ["Load", "Create"]
