@@ -1,17 +1,13 @@
 #!/usr/bin/python3
-import ui
 import numpy as np
-#import scipy.misc as smp # Required to export image
-from skimage import io
+import scipy.misc as smp # Save images
+import scipy.ndimage as snd # Load images
 import math # Aids "length" variable
-import multiprocessing as mp # PARALELL PROCESSING
-import os
-import time
-from tqdm import tqdm
 import progressbar as pb
 from math import isinf
-
+import os
 import gc
+import ui
 
 def getDims(f):
     """Returns (width, height) of byte plot image"""
@@ -79,7 +75,7 @@ def buildImages(files, targets, type):
                 images.append(bytePlot(list(f.read())))
             elif type == "Markov":
                 images.append(markovPlot(list(f.read())))
-            io.imsave("{}.bmp".format(file), images[-1])
+            smp.imsave("{}.bmp".format(file), images[-1])
     return images, targets
 
 def loadImages(files, targets):
@@ -87,7 +83,7 @@ def loadImages(files, targets):
     images = []
     for file in pb.progressbar(files):
         targets.append(file)
-        images.append(io.imread(file, as_gray=True))
+        images.append(snd.imread(file))
     return images, targets
 
 def imagePages(files, choice):
