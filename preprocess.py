@@ -31,7 +31,19 @@ def getdims(f):
         width = 1024
     return (width, math.ceil(size*1000 // width)+ 1)
 
-def makearray(f):
+def buildImages(files, targets, type):
+    images = []
+    for file in pb.progressbar(files):
+        targets.append(file)
+        with open(file, "rb") as f:
+            if type == "Byte":
+                images.append(bytePlot(list(f.read())))
+            else:
+                print("Invalid Type")
+            makeimage(file, images[-1])
+    return images, targets
+
+def bytePlot(f):
     dimensions = getdims(f)
     data = np.array(f)
     data = np.pad(
@@ -61,20 +73,18 @@ def load(files):
     return targets, pageNames 
 
 def create(files):
+    options = ["Byte", "Markov"]
+    type = options[int(ui.prompt("Choose a visualization type", options))]
+
     targets = []
     pageNames = []
     pageSize = 1000
     pages = range(math.ceil(len(files)/pageSize))
     for page in pages:
         print("\nPage {}/{}".format(page+1, len(pages)))
-        images = []
         gc.collect() # Garbage collect
         start = page*pageSize
-        for item in pb.progressbar(files[start:start+pageSize]):
-            targets.append(item)
-            with open(item, "rb") as f:
-                images.append( makearray(list(f.read())) )
-                makeimage(item, images[-1])
+        images, targets = buildImages(files[start:start+pageSize], targets, type)
         pageNames.append("./pages/images_page{}.npy".format(page))
         np.save(pageNames[-1], images)
     return targets, pageNames
@@ -83,15 +93,16 @@ def process(directory):
     files = []
 
     options = ["Load", "Create"]
-    choice = int(ui.prompt(options=options))
-    if choice == 0:
+    choice = options[int(ui.prompt(options=options))]
+
+    if choice == "Load":
         for item in os.listdir(directory):
             if( os.path.isfile(os.path.join(directory, item)) and
             item.endswith(".bmp") ):
                 files.append(os.path.join(directory, item))
         targets, pageNames = load(files)
 
-    elif choice == 1:
+    elif choice == "Create":
         for item in os.listdir(directory):
             if( os.path.isfile(os.path.join(directory, item)) and
             (item.endswith(".pdf") or item.endswith(".file")) ):
