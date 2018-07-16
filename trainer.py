@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 import numpy as np
+import preprocess as pproc
+import features as ft
+import os
+import ui
 
 # ML Classifiers
 from sklearn import svm
@@ -9,9 +13,8 @@ from sklearn.neighbors import KNeighborsClassifier
 
 # Model evaluation
 from sklearn.model_selection import cross_validate
+import sklearn.metrics as skm
 
-import ui
-    
 def model_evaluation(data, targets, clf):
     # Cross validate and calculate scores
     scoring = ["accuracy", "precision", "recall", "f1"] # Choose scoring methods
@@ -45,4 +48,19 @@ def train(data, targets):
     if mode == "Cross validation":
         model_evaluation(data, targets, clf)
     elif mode == "Build and test model":
-        print("HERE") 
+        clf.fit(data, targets)
+
+        while True:
+            res = ui.prompt("Which directory are the test files in?")
+            if os.path.isdir(res):
+                break
+            print("ERROR: Directory not found.")
+
+        pageNames, y_true = pproc.process(res)    
+        y_true = [val == "INFEC" for val in y_true] # Set INFEC as positive val
+        test_data = ft.features(pageNames)
+    
+        y_pred = clf.predict(test_data)
+        
+        f1 = skm.f1_score(y_true, y_pred, average=None)
+        print("F1:        {},\t{}".format(round(np.mean(skm.f1_score(y_true, y_pred, average=None)), 4), f1))
