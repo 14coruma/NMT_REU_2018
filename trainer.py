@@ -48,14 +48,18 @@ def train(data, targets):
     if mode == "Cross validation":
         model_evaluation(data, targets, clf)
     elif mode == "Build and test model":
+        # Train model
         clf.fit(data, targets)
 
+        # Get test dir
         while True:
             res = ui.prompt("Which directory are the test files in?")
             if os.path.isdir(res):
                 break
             print("ERROR: Directory not found.")
 
+        # Set up data/targets for test model
+        print("\n** PREPARING MODEL FOR EVALUATION **\n")
         pageNames, y_true = pproc.process(res)    
         y_true = [val == "INFEC" for val in y_true] # Set INFEC as positive val
         test_data = ft.features(pageNames)
