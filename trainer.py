@@ -11,8 +11,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_validate
 
 import ui
-
-def train(data, targets):
+    
+def model_evaluation(data, targets):
     options = ["Support Vector Machine", "Random Forest",
             "Decision Tree Classifier", "KNN"]
     res = ui.prompt("Choose a ML algorithm:", options)
@@ -33,3 +33,13 @@ def train(data, targets):
     print("Precision: {},\t{}".format(round(np.mean(scores["test_precision"]), 4), scores["test_precision"]))
     print("Recall:    {},\t{}".format(round(np.mean(scores["test_recall"]),    4), scores["test_recall"]))
     print("F1:        {},\t{}".format(round(np.mean(scores["test_f1"]),        4), scores["test_f1"]))
+
+def train(data, targets):
+    options = ["Cross validation", "Build and test model"]
+    res = ui.prompt(options=options)
+    mode = options[int(res)]
+
+    if mode == "Cross validation":
+        model_evaluation(data, targets)
+    elif mode == "Build and test model":
+        print("HERE");
