@@ -59,12 +59,21 @@ def train(data, targets):
             print("ERROR: Directory not found.")
 
         # Set up data/targets for test model
-        print("\n** PREPARING MODEL FOR EVALUATION **\n")
+        print("\n************************************")
+        print("*  PREPARING MODEL FOR EVALUATION  *")
+        print("************************************")
+
         pageNames, y_true = pproc.process(res)    
         y_true = [val == "INFEC" for val in y_true] # Set INFEC as positive val
         test_data = ft.features(pageNames)
     
         y_pred = clf.predict(test_data)
-        
+       
+        accuracy = skm.accuracy_score(y_true, y_pred)
+        precision = skm.precision_score(y_true, y_pred, average=None)
+        recall = skm.recall_score(y_true, y_pred, average=None)
         f1 = skm.f1_score(y_true, y_pred, average=None)
-        print("F1:        {},\t{}".format(round(np.mean(skm.f1_score(y_true, y_pred, average=None)), 4), f1))
+        print("Accuracy:  {}".format(accuracy))
+        print("Precision: {}".format(precision[0]))
+        print("Recall:    {}".format(recall[0]))
+        print("F1:        {}".format(f1[0]))
