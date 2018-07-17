@@ -39,7 +39,11 @@ def compute_feats(image, kernels):
 def describe_keypoints(img, alg, vector_size, descriptor_size, display=False):
     """Create description vector for keypoints in an image"""
     # Finding image keypoints
-    kps = alg.detect(img, None)
+    kps = []
+    try:
+        kps = alg.detect(img, None)
+    except:
+        pass
 
     # Get first sorted <vector_size> points.
     kps = sorted(kps, key=lambda x: x.response)[:vector_size]
