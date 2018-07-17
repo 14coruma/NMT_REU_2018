@@ -68,7 +68,7 @@ def markovPlot(f):
 def buildImages(files, targets, type):
     """Builds mages from array of filenames. Returns (images, targets)"""
     images = []
-    for file in pb.progressbar(files):
+    for file in files:
         targets.append(file)
         with open(file, "rb") as f:
             if type == "Byte":
@@ -81,7 +81,7 @@ def buildImages(files, targets, type):
 def loadImages(files, targets):
     """Loads an array of bmp images. Returns (images, targets)"""
     images = []
-    for file in pb.progressbar(files):
+    for file in files:
         targets.append(file)
         images.append(snd.imread(file))
     return images, targets
@@ -95,8 +95,8 @@ def imagePages(files, choice):
     pageNames = []
     pageSize = 100
     pages = range(math.ceil(len(files)/pageSize))
-    for page in pages:
-        print("\nPage {}/{}".format(page+1, len(pages)))
+    for page in pb.progressbar(pages):
+        # print("\nPage {}/{}".format(page+1, len(pages)))
         gc.collect() # Garbage collect
 
         images = []
