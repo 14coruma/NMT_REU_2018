@@ -87,13 +87,13 @@ def loadImages(files, targets):
     return images, targets
 
 def imagePages(files, choice):
-    """Pages images into npy file in groups of 1000"""
+    """Pages images into npy file in groups of 100"""
     options = ["Byte", "Markov"]
     type = options[int(ui.prompt("Choose a visualization type", options))]
 
     targets = []
     pageNames = []
-    pageSize = 1000
+    pageSize = 100
     pages = range(math.ceil(len(files)/pageSize))
     for page in pages:
         print("\nPage {}/{}".format(page+1, len(pages)))

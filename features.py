@@ -126,5 +126,4 @@ def features(pageNames):
             else:
                 data = np.concatenate((data, pool.map(fn, images, 16)))
 
-    print(len(data))
     return data 
