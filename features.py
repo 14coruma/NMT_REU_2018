@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import numpy as np
 import gc
+import os
 from multiprocessing import Pool
 
 import cv2 # (ORB, SIFT, cvtColor(grey))
@@ -115,7 +116,7 @@ def features(pageNames):
     print("Should take less than {} minutes.".format(len(pageNames)*2))
     print("Please wait...\n")
 
-    # Run this with a pool of 5 agents until finished
+    # Run this with a pool of 3 agents until finished
     data = []
     for pageName in pb.progressbar(pageNames):
         gc.collect()
@@ -125,5 +126,7 @@ def features(pageNames):
                 data = pool.map(fn, images, 16)
             else:
                 data = np.concatenate((data, pool.map(fn, images, 16)))
+        # Remove paged files (to clear up disk space)
+        os.unlink(pageName)
 
     return data 
