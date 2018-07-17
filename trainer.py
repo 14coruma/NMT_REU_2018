@@ -69,10 +69,12 @@ def train(data, targets):
     
         y_pred = clf.predict(test_data)
        
+        conf_matrix = skm.confusion_matrix(y_true, y_pred)
         accuracy = skm.accuracy_score(y_true, y_pred)
         precision = skm.precision_score(y_true, y_pred, average=None)
         recall = skm.recall_score(y_true, y_pred, average=None)
         f1 = skm.f1_score(y_true, y_pred, average=None)
+        print("\n{}".format(conf_matrix))
         print("Accuracy:  {}".format(accuracy))
         print("Precision: {}".format(precision[0]))
         print("Recall:    {}".format(recall[0]))
