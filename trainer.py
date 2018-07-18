@@ -26,7 +26,7 @@ def model_evaluation(data, targets, clf):
     print("F1:        {},\t{}".format(round(np.mean(scores["test_f1"]),        4), scores["test_f1"]))
 
 def train(data, targets):
-    targets = [val == "INFEC" for val in targets] # Set INFEC as positive val
+    targets = [val == "CLEAN" for val in targets] # Set INFEC as positive val
    
     # Choose training mode
     options = ["Cross validation", "Build and test model"]
@@ -64,11 +64,11 @@ def train(data, targets):
         print("************************************")
 
         pageNames, y_true = pproc.process(res)    
-        y_true = [val == "INFEC" for val in y_true] # Set INFEC as positive val
+        y_true = [val == "CLEAN" for val in y_true] # Set INFEC as positive val
         test_data = ft.features(pageNames)
-    
+   
         y_pred = clf.predict(test_data)
-       
+    
         conf_matrix = skm.confusion_matrix(y_true, y_pred)
         accuracy = skm.accuracy_score(y_true, y_pred)
         precision = skm.precision_score(y_true, y_pred, average=None)
