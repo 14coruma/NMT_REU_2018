@@ -121,6 +121,8 @@ def features(pageNames):
     for pageName in pb.progressbar(pageNames):
         gc.collect()
         images = np.load(pageName)
+        # for image in images:
+        #     data.append(fn(image))
         with Pool(processes=3) as pool:
             if len(data) == 0:
                 data = pool.map(fn, images, 16)
