@@ -15,6 +15,26 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_validate
 import sklearn.metrics as skm
 
+def save_filenames(y_true, y_pred, filenames):
+    """Save filenames sorted by confusion matrix"""
+    tp = []
+    tn = []
+    fp = []
+    fn = []
+    for i in range(len(y_true)):
+        if not y_true[i] and not y_pred[i]:
+            tp.append(filenames[i])
+        elif y_true[i] and y_pred[i]:
+            tn.append(filenames[i])
+        elif not y_true[i] and y_pred[i]:
+            fn.append(filenames[i])
+        elif y_true[i] and not y_pred[i]:
+            fp.append(filenames[i])
+    np.savetxt("results/true_pos.txt", tp, delimiter=",", fmt="%s")
+    np.savetxt("results/true_neg.txt", tn, delimiter=",", fmt="%s")
+    np.savetxt("results/false_pos.txt", fp, delimiter=",", fmt="%s")
+    np.savetxt("results/false_neg.txt", fn, delimiter=",", fmt="%s")
+
 def false_pos(y_true, y_pred, args=None):
     """Count number of false positives"""
     fp_count = 0
@@ -97,6 +117,8 @@ def train(data, targets, filenames):
         test_data = ft.features(pageNames)
    
         y_pred = clf.predict(test_data)
+
+        save_filenames(y_true, y_pred, filenames)
     
         conf_matrix = skm.confusion_matrix(y_true, y_pred)
         accuracy = skm.accuracy_score(y_true, y_pred)
