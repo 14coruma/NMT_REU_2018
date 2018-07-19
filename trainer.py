@@ -16,6 +16,7 @@ from sklearn.model_selection import cross_validate
 import sklearn.metrics as skm
 
 def false_pos(y_true, y_pred, args=None):
+    """Count number of false positives"""
     fp_count = 0
     for i in range(len(y_true)):
         if y_true[i] and not y_pred[i]:
@@ -24,6 +25,7 @@ def false_pos(y_true, y_pred, args=None):
     return fp_count
 
 def false_neg(y_true, y_pred, args=None):
+    """Count number of false negatives"""
     fn_count = 0
     for i in range(len(y_true)):
         if not y_true[i] and y_pred[i]:
@@ -52,7 +54,7 @@ def model_evaluation(data, targets, clf):
     print("False Pos: {},\t{}".format(round(np.mean(scores["test_f_pos"]),     4), scores["test_f_pos"]))
     print("False Neg: {},\t{}".format(round(np.mean(scores["test_f_neg"]),     4), scores["test_f_neg"]))
 
-def train(data, targets):
+def train(data, targets, filenames):
     targets = [val == "CLEAN" for val in targets] # Set INFEC as positive val
    
     # Choose training mode
@@ -90,7 +92,7 @@ def train(data, targets):
         print("*  PREPARING MODEL FOR EVALUATION  *")
         print("************************************")
 
-        pageNames, y_true = pproc.process(res)    
+        pageNames, y_true, filenames = pproc.process(res)    
         y_true = [val == "CLEAN" for val in y_true] # Set INFEC as positive val
         test_data = ft.features(pageNames)
    

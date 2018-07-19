@@ -124,7 +124,7 @@ def process(directory):
             elif choice == "Create" and item.endswith(".file"):
                 files.append(filename)
 
-    targets, pageNames = imagePages(files, choice)
+    filenames, pageNames = imagePages(files, choice)
     
-    targets = [name.split('/')[-1][:5] for name in targets]
-    return pageNames, targets
+    targets = [name.split('/')[-1][:5] for name in filenames]
+    return pageNames, targets, filenames
