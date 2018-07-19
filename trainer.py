@@ -41,7 +41,6 @@ def false_pos(y_true, y_pred, args=None):
     for i in range(len(y_true)):
         if y_true[i] and not y_pred[i]:
             fp_count += 1
-    #return fp_count / len(y_true)
     return fp_count
 
 def false_neg(y_true, y_pred, args=None):
@@ -50,7 +49,6 @@ def false_neg(y_true, y_pred, args=None):
     for i in range(len(y_true)):
         if not y_true[i] and y_pred[i]:
             fn_count += 1
-    #return fn_count / len(y_true)
     return fn_count
 
 def model_evaluation(data, targets, clf):    
@@ -63,9 +61,10 @@ def model_evaluation(data, targets, clf):
             "recall": "recall",
             "f1": "f1",
             "f_pos": f_pos,
-            "f_neg": f_neg
+            "f_neg": f_neg,
     }
     scores = cross_validate(clf, data, targets, scoring=scoring, cv=5)
+    print(scores)
     print("Scores calculated from 5-fold cross validation:")
     print("Accuracy:  {},\t{}".format(round(np.mean(scores["test_accuracy"]),  4), scores["test_accuracy"]))
     print("Precision: {},\t{}".format(round(np.mean(scores["test_precision"]), 4), scores["test_precision"]))
