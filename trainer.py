@@ -15,15 +15,42 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_validate
 import sklearn.metrics as skm
 
-def model_evaluation(data, targets, clf):
+def false_pos(y_true, y_pred, args=None):
+    fp_count = 0
+    for i in range(len(y_true)):
+        if y_true[i] and not y_pred[i]:
+            fp_count += 1
+    #return fp_count / len(y_true)
+    return fp_count
+
+def false_neg(y_true, y_pred, args=None):
+    fn_count = 0
+    for i in range(len(y_true)):
+        if not y_true[i] and y_pred[i]:
+            fn_count += 1
+    #return fn_count / len(y_true)
+    return fn_count
+
+def model_evaluation(data, targets, clf):    
     # Cross validate and calculate scores
-    scoring = ["accuracy", "precision", "recall", "f1"] # Choose scoring methods
+    f_pos = skm.make_scorer(false_pos)
+    f_neg = skm.make_scorer(false_neg)
+    scoring = {
+            "accuracy": "accuracy",
+            "precision": "precision",
+            "recall": "recall",
+            "f1": "f1",
+            "f_pos": f_pos,
+            "f_neg": f_neg
+    }
     scores = cross_validate(clf, data, targets, scoring=scoring, cv=5)
     print("Scores calculated from 5-fold cross validation:")
     print("Accuracy:  {},\t{}".format(round(np.mean(scores["test_accuracy"]),  4), scores["test_accuracy"]))
     print("Precision: {},\t{}".format(round(np.mean(scores["test_precision"]), 4), scores["test_precision"]))
     print("Recall:    {},\t{}".format(round(np.mean(scores["test_recall"]),    4), scores["test_recall"]))
     print("F1:        {},\t{}".format(round(np.mean(scores["test_f1"]),        4), scores["test_f1"]))
+    print("False Pos: {},\t{}".format(round(np.mean(scores["test_f_pos"]),     4), scores["test_f_pos"]))
+    print("False Neg: {},\t{}".format(round(np.mean(scores["test_f_neg"]),     4), scores["test_f_neg"]))
 
 def train(data, targets):
     targets = [val == "CLEAN" for val in targets] # Set INFEC as positive val
