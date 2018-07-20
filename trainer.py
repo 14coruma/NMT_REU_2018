@@ -64,7 +64,6 @@ def model_evaluation(data, targets, clf):
             "f_neg": f_neg,
     }
     scores = cross_validate(clf, data, targets, scoring=scoring, cv=5)
-    print(scores)
     print("Scores calculated from 5-fold cross validation:")
     print("Accuracy:  {},\t{}".format(round(np.mean(scores["test_accuracy"]),  4), scores["test_accuracy"]))
     print("Precision: {},\t{}".format(round(np.mean(scores["test_precision"]), 4), scores["test_precision"]))
