@@ -12,7 +12,7 @@ import ui
 
 MY_KEY = "d98dcf2ab3e64df99df3bb85ed2b98203795cabf83ab407450e40b4c0732c3ad"
 MALWARE_THRESHOLD = 0.25
-SCANNERS = ["Avast", "McAfee", "nProtect", "Symantec", "Webroot"]
+SCANNERS = ["Avast", "AVG", "McAfee", "Microsoft", "nProtect", "Symantec", "Webroot"]
 
 def report(file_id):
     url = 'https://www.virustotal.com/vtapi/v2/file/report'
