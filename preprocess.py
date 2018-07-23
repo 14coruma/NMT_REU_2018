@@ -101,9 +101,10 @@ def hilbertPlot(f):
     """Create hilbert plot, which is plot of bytes in shape of hilbert curve"""
     order = getOrder(f)
     img = np.zeros(shape=(2 ** order, 2 ** order))
-    for d in range(len(f)):
+    #for d in range(len(f)):
+    for d in range((2 ** order) ** 2):
         x, y = d2xy(2 ** order, d)
-        img[x, y] = f[d]
+        img[x, y] = f[d % len(f)]
     return img
 
 def buildImages(files, targets, type):

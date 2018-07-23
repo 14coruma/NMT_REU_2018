@@ -81,7 +81,7 @@ def extract_LBP(img):
     points = 32
     radius = 16
     lbp = local_binary_pattern(img, points, radius, method="uniform")
-    hist = np.array(exposure.histogram(lbp, nbins=16)[0])
+    hist = np.array(exposure.histogram(lbp, nbins=64)[0])
     hist = np.divide(hist, sum(hist)) # Normalize histogram
     return hist
 
@@ -130,5 +130,5 @@ def features(pageNames):
                 data = np.concatenate((data, pool.map(fn, images, 16)))
         # Remove paged files (to clear up disk space)
         os.unlink(pageName)
-
+    
     return data 

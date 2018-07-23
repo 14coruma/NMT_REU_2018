@@ -2,6 +2,7 @@
 import numpy as np
 import preprocess as pproc
 import features as ft
+import random
 import os
 import ui
 
@@ -21,6 +22,7 @@ def save_filenames(y_true, y_pred, filenames):
     tn = []
     fp = []
     fn = []
+    prefix = str(random.randrange(1000000, 9999999))
     for i in range(len(y_true)):
         if not y_true[i] and not y_pred[i]:
             tp.append(filenames[i])
@@ -30,10 +32,11 @@ def save_filenames(y_true, y_pred, filenames):
             fn.append(filenames[i])
         elif y_true[i] and not y_pred[i]:
             fp.append(filenames[i])
-    np.savetxt("results/true_pos.txt", tp, delimiter=",", fmt="%s")
-    np.savetxt("results/true_neg.txt", tn, delimiter=",", fmt="%s")
-    np.savetxt("results/false_pos.txt", fp, delimiter=",", fmt="%s")
-    np.savetxt("results/false_neg.txt", fn, delimiter=",", fmt="%s")
+    np.savetxt("results/{}_true_pos.txt".format(prefix), tp, delimiter=",", fmt="%s")
+    np.savetxt("results/{}_true_neg.txt".format(prefix), tn, delimiter=",", fmt="%s")
+    np.savetxt("results/{}_false_pos.txt".format(prefix), fp, delimiter=",", fmt="%s")
+    np.savetxt("results/{}_false_neg.txt".format(prefix), fn, delimiter=",", fmt="%s")
+    return 0
 
 def false_pos(y_true, y_pred, args=None):
     """Count number of false positives"""
@@ -63,7 +66,7 @@ def model_evaluation(data, targets, clf):
             "f_pos": f_pos,
             "f_neg": f_neg,
     }
-    scores = cross_validate(clf, data, targets, scoring=scoring, cv=5)
+    scores = cross_validate(clf, data, targets, scoring=scoring, cv=10)
     print("Scores calculated from 5-fold cross validation:")
     print("Accuracy:  {},\t{}".format(round(np.mean(scores["test_accuracy"]),  4), scores["test_accuracy"]))
     print("Precision: {},\t{}".format(round(np.mean(scores["test_precision"]), 4), scores["test_precision"]))
@@ -100,8 +103,8 @@ def train(data, targets, filenames):
 
         # Get test dir
         while True:
-            res = ui.prompt("Which directory are the test files in?")
-            if os.path.isdir(res):
+            dirname = ui.prompt("Which directory are the test files in?")
+            if os.path.isdir(dirname):
                 break
             print("ERROR: Directory not found.")
 
