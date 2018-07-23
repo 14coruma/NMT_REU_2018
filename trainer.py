@@ -89,7 +89,7 @@ def train(data, targets, filenames):
     res = ui.prompt("Choose a ML algorithm:", options)
     switch = {
         0: svm.SVC(C=100., random_state=0),
-        1: RandomForestClassifier(max_depth=3, random_state=0),
+        1: RandomForestClassifier(n_estimators=20, max_depth=None, random_state=0),
         2: DecisionTreeClassifier(random_state=0),
         3: KNeighborsClassifier()
     }
@@ -113,7 +113,7 @@ def train(data, targets, filenames):
         print("*  PREPARING MODEL FOR EVALUATION  *")
         print("************************************")
 
-        pageNames, y_true, filenames = pproc.process(res)    
+        pageNames, y_true, filenames = pproc.process(dirname)    
         y_true = [val == "CLEAN" for val in y_true] # Set INFEC as positive val
         test_data = ft.features(pageNames)
    
