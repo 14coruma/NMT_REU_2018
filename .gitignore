@@ -4,6 +4,7 @@ old_preprocess.py
 old_preprocess
 test
 pages
+results
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

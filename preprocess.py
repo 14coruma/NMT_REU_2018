@@ -65,38 +65,82 @@ def markovPlot(f):
     
     return img.astype(np.uint8)
 
+def getOrder(f):
+    """Find order of hilbert curve needed for a file size"""
+    order = 0
+    while (2 ** order) ** 2 < len(f):
+        order += 1
+    return order
+
+def rot(n, x, y, rx, ry):
+    """Rotate/flip a hilbert quadrant"""
+    if ry == 0:
+        if rx == 1:
+            x = (n-1) - x
+            y = (n-1) - y
+        t = x
+        x = y
+        y = t
+    return x, y
+
+def d2xy(n, d):
+    """Convert a linear position, d, to hilbert (x,y)"""
+    x, y, rx, ry, s, t = 0, 0, 0, 0, 0, d
+    s = 1
+    while s < n:
+        rx = 1 & (t // 2)
+        ry = 1 & (t ^ rx)
+        x, y = rot(s, x, y, rx, ry)
+        x += s * rx
+        y += s * ry
+        t = t // 4
+        s *= 2
+    return x, y
+
+def hilbertPlot(f):
+    """Create hilbert plot, which is plot of bytes in shape of hilbert curve"""
+    order = getOrder(f)
+    img = np.zeros(shape=(2 ** order, 2 ** order))
+    #for d in range(len(f)):
+    for d in range((2 ** order) ** 2):
+        x, y = d2xy(2 ** order, d)
+        img[x, y] = f[d % len(f)]
+    return img
+
 def buildImages(files, targets, type):
     """Builds mages from array of filenames. Returns (images, targets)"""
     images = []
-    for file in pb.progressbar(files):
+    for file in files:
         targets.append(file)
         with open(file, "rb") as f:
             if type == "Byte":
                 images.append(bytePlot(list(f.read())))
             elif type == "Markov":
                 images.append(markovPlot(list(f.read())))
-            smp.imsave("{}.bmp".format(file), images[-1])
+            elif type == "Hilbert":
+                images.append(hilbertPlot(list(f.read())))
+            smp.imsave("{}.png".format(file), images[-1])
     return images, targets
 
 def loadImages(files, targets):
-    """Loads an array of bmp images. Returns (images, targets)"""
+    """Loads an array of png images. Returns (images, targets)"""
     images = []
-    for file in pb.progressbar(files):
+    for file in files:
         targets.append(file)
         images.append(snd.imread(file))
     return images, targets
 
 def imagePages(files, choice):
-    """Pages images into npy file in groups of 1000"""
-    options = ["Byte", "Markov"]
+    """Pages images into npy file in groups of 100"""
+    options = ["Byte", "Markov", "Hilbert"]
     type = options[int(ui.prompt("Choose a visualization type", options))]
 
     targets = []
     pageNames = []
-    pageSize = 1000
+    pageSize = 100
     pages = range(math.ceil(len(files)/pageSize))
-    for page in pages:
-        print("\nPage {}/{}".format(page+1, len(pages)))
+    for page in pb.progressbar(pages):
+        # print("\nPage {}/{}".format(page+1, len(pages)))
         gc.collect() # Garbage collect
 
         images = []
@@ -119,12 +163,12 @@ def process(directory):
     for item in os.listdir(directory):
         if os.path.isfile(os.path.join(directory, item)):
             filename = os.path.join(directory, item)
-            if choice == "Load" and item.endswith(".bmp"):
+            if choice == "Load" and item.endswith(".png"):
                 files.append(filename)
             elif choice == "Create" and item.endswith(".file"):
                 files.append(filename)
 
-    targets, pageNames = imagePages(files, choice)
+    filenames, pageNames = imagePages(files, choice)
     
-    targets = [name.split('/')[-1][:5] for name in targets]
-    return pageNames, targets
+    targets = [name.split('/')[-1][:5] for name in filenames]
+    return pageNames, targets, filenames

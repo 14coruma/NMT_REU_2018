@@ -1,7 +1,12 @@
 #!/usr/bin/python3
 import numpy as np
 import gc
+import os
 from multiprocessing import Pool
+
+import scipy.misc as smp # Save images
+import time
+import matplotlib.pyplot as plt
 
 import cv2 # (ORB, SIFT, cvtColor(grey))
 from scipy import ndimage as nd # For convolving kernel
@@ -80,7 +85,7 @@ def extract_LBP(img):
     points = 32
     radius = 16
     lbp = local_binary_pattern(img, points, radius, method="uniform")
-    hist = np.array(exposure.histogram(lbp, nbins=16)[0])
+    hist = np.array(exposure.histogram(lbp, nbins=64)[0])
     hist = np.divide(hist, sum(hist)) # Normalize histogram
     return hist
 
@@ -115,16 +120,19 @@ def features(pageNames):
     print("Should take less than {} minutes.".format(len(pageNames)*2))
     print("Please wait...\n")
 
-    # Run this with a pool of 5 agents until finished
+    # Run this with a pool of 3 agents until finished
     data = []
     for pageName in pb.progressbar(pageNames):
         gc.collect()
         images = np.load(pageName)
+        # for image in images:
+        #     data.append(fn(image))
         with Pool(processes=3) as pool:
             if len(data) == 0:
                 data = pool.map(fn, images, 16)
             else:
                 data = np.concatenate((data, pool.map(fn, images, 16)))
-
-    print(len(data))
+        # Remove paged files (to clear up disk space)
+        os.unlink(pageName)
+    
     return data 
