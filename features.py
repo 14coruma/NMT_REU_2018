@@ -4,6 +4,10 @@ import gc
 import os
 from multiprocessing import Pool
 
+import scipy.misc as smp # Save images
+import time
+import matplotlib.pyplot as plt
+
 import cv2 # (ORB, SIFT, cvtColor(grey))
 from scipy import ndimage as nd # For convolving kernel
 from skimage import exposure # For creating histogram
